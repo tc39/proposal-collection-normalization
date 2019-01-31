@@ -194,11 +194,11 @@ contributors: Bradley Farias
           1. Set _set_.[[SetData]] to a new empty List.
           
           1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _set_.[[ToValue]] to *undefined*
+            1. Set _set_.[[ToKey]] to *undefined*
           </ins>
           1. <ins class="block">Else,
-            1. Set _set_.[[ToValue]] to ? Get(_options_, `"toValue"`).
-            1. If _set_.[[ToValue]] is *null* set _set_.[[ToValue]] to *undefined*
+            1. Set _set_.[[ToKey]] to ? Get(_options_, `"toKey"`).
+            1. If _set_.[[ToKey]] is *null* set _set_.[[ToKey]] to *undefined*
           </ins>
           1. If _iterable_ is not present, set _iterable_ to *undefined*.
           1. If _iterable_ is either *undefined* or *null*, return _set_.
@@ -223,7 +223,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[SetData]] internal slot.</li>
-        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[ToKey]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-set.prototype.add">
@@ -446,11 +446,11 @@ contributors: Bradley Farias
           1. Let _set_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakSetPrototype%"`, &laquo; [[WeakSetData]] &raquo;).
           1. Set _set_.[[WeakSetData]] to a new empty List.
           1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _map_.[[ToValue]] to *undefined*
+            1. Set _map_.[[ToKey]] to *undefined*
           </ins>
           1. <ins class="block">Else,
-            1. Set _map_.[[ToValue]] to ? Get(_options_, `"toValue"`).
-            1. If _map_.[[ToValue]] is *null* set _map_.[[ToValue]] to *undefined*
+            1. Set _map_.[[ToKey]] to ? Get(_options_, `"toKey"`).
+            1. If _map_.[[ToKey]] is *null* set _map_.[[ToKey]] to *undefined*
           </ins>
           1. If _iterable_ is not present, set _iterable_ to *undefined*.
           1. If _iterable_ is either *undefined* or *null*, return _set_.
