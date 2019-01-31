@@ -233,7 +233,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToKey(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[SetData]].
           1. For each _e_ that is an element of _entries_, do
             1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
@@ -251,7 +251,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToKey(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[SetData]].
           1. For each _e_ that is an element of _entries_, do
             1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
@@ -271,7 +271,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToKey(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[SetData]].
           1. For each _e_ that is an element of _entries_, do
             1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, return *true*.
@@ -484,7 +484,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToKey(_S_, _value_).</ins>
           1. If Type(_value_) is not Object, throw a *TypeError* exception.
           1. Let _entries_ be the List that is _S_.[[WeakSetData]].
           1. For each _e_ that is an element of _entries_, do
@@ -502,7 +502,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToKey(_S_, _value_).</ins>
           1. If Type(_value_) is not Object, return *false*.
           1. Let _entries_ be the List that is _S_.[[WeakSetData]].
           1. For each _e_ that is an element of _entries_, do
@@ -523,7 +523,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToKey(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[WeakSetData]].
           1. If Type(_value_) is not Object, return *false*.
           1. For each _e_ that is an element of _entries_, do
