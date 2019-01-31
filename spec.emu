@@ -1,0 +1,535 @@
+<!doctype html>
+<meta charset="utf8">
+<link rel="stylesheet" href="./spec.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+<script src="./spec.js"></script>
+<pre class="metadata">
+title: Collection data normalization
+stage: 1
+contributors: Bradley Farias
+</pre>
+
+<emu-clause id="normalization-ops">
+  <h1>Data normalization operations</h1>
+  
+  <emu-clause id="normalize-to-key">
+  <h1>NormalizeToKey( _collection_ , _data_ )</h1>
+  <emu-alg>
+    1. If _collection_ does not have [[ToKey]] or _collection_.[[ToKey]] is *undefined*
+      1. Return _data_.
+    1. Else, return Call(_collection_.[[ToKey]], _collection_, &laquo; _data_ &raquo;).
+  </emu-alg>
+  </emu-clause>
+
+  <emu-clause id="normalize-to-value">
+  <h1>NormalizeToValue( _collection_ , _data_ )</h1>
+  <emu-alg>
+    1. If _collection_ does not have [[ToValue]] or _collection_.[[ToValue]] is *undefined*
+      1. Return _data_.
+    1. Else, return Call(_collection_.[[ToValue]], _collection_, &laquo; _data_ &raquo;).
+  </emu-alg>
+  </emu-clause>
+</emu-clause>
+
+<h1>Modified algorithms</h1>
+
+<emu-clause id="sec-keyed-collections" oldids="sec-keyed-collection">
+  <h1>Keyed Collections</h1>
+
+  <emu-clause id="sec-map-objects">
+    <h1>Map Objects</h1>
+    <p>Map objects are collections of key/value pairs where both the keys and values may be arbitrary ECMAScript language values. A distinct key value may only occur in one key/value pair within the Map's collection. Distinct key values are discriminated using the SameValueZero comparison algorithm.</p>
+    <p>Map object must be implemented using either hash tables or other mechanisms that, on average, provide access times that are sublinear on the number of elements in the collection. The data structures used in this Map objects specification is only intended to describe the required observable semantics of Map objects. It is not intended to be a viable implementation model.</p>
+
+    <emu-clause id="sec-map-constructor">
+      <h1>The Map Constructor</h1>
+      <p>The Map constructor:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%Map%</dfn>.</li>
+        <li>is the initial value of the `Map` property of the global object.</li>
+        <li>creates and initializes a new Map object when called as a constructor.</li>
+        <li>is not intended to be called as a function and will throw an exception when called in that manner.</li>
+        <li>is designed to be subclassable. It may be used as the value in an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified `Map` behaviour must include a `super` call to the `Map` constructor to create and initialize the subclass instance with the internal state necessary to support the `Map.prototype` built-in methods.</li>
+      </ul>
+
+      <emu-clause id="sec-map-iterable">
+        <h1>Map ( [ _iterable_ <ins>[, _options_ ]</ins> ] )</h1>
+        <p>When the `Map` function is called with optional argument _iterable_, the following steps are taken:</p>
+        <emu-alg>
+          1. If NewTarget is *undefined*, throw a *TypeError* exception.
+          1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%MapPrototype%"`, &laquo; [[MapData]], [[ToKey]], [[ToValue]] &raquo;).
+          1. Set _map_.[[MapData]] to a new empty List.
+          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
+            1. Set _map_.[[ToKey]] to *undefined*
+            1. Set _map_.[[ToValue]] to *undefined*
+          </ins>
+          1. <ins class="block">Else,
+            1. Set _map_.[[ToKey]] to ? Get(_options_, `"toKey"`).
+            1. If _map_.[[ToKey]] is *null* set _map_.[[ToKey]] to *undefined*
+            1. Set _map_.[[ToValue]] to ? Get(_options_, `"toValue"`).
+            1. If _map_.[[ToValue]] is *null* set _map_.[[ToValue]] to *undefined*
+          </ins>
+          1. If _iterable_ is not present, or is either *undefined* or *null*, return _map_.
+          1. Let _adder_ be ? Get(_map_, `"set"`).
+          1. Return ? AddEntriesFromIterable(_map_, _iterable_, _adder_).
+        </emu-alg>
+        <emu-note>
+          <p>If the parameter _iterable_ is present, it is expected to be an object that implements an @@iterator method that returns an iterator object that produces a two element array-like object whose first element is a value that will be used as a Map key and whose second element is the value to associate with that key.</p>
+        </emu-note>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-properties-of-the-map-prototype-object">
+      <h1>Properties of the Map Prototype Object</h1>
+      <p>The Map prototype object:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%MapPrototype%</dfn>.</li>
+        <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
+        <li>is an ordinary object.</li>
+        <li>does not have a [[MapData]] internal slot.</li>
+        <li><ins>does not have a [[ToKey]] internal slot.</ins></li>
+        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+      </ul>
+
+      <emu-clause id="sec-map.prototype.delete">
+        <h1>Map.prototype.delete ( _key_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. Let _entries_ be the List that is _M_.[[MapData]].
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, then
+              1. Set _p_.[[Key]] to ~empty~.
+              1. Set _p_.[[Value]] to ~empty~.
+              1. Return *true*.
+          1. Return *false*.
+        </emu-alg>
+        <emu-note>
+          <p>The value ~empty~ is used as a specification device to indicate that an entry has been deleted. Actual implementations may take other actions such as physically removing the entry from internal data structures.</p>
+        </emu-note>
+      </emu-clause>
+
+      <emu-clause id="sec-map.prototype.get">
+        <h1>Map.prototype.get ( _key_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. Let _entries_ be the List that is _M_.[[MapData]].
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, return _p_.[[Value]].
+          1. Return *undefined*.
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-map.prototype.has">
+        <h1>Map.prototype.has ( _key_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. Let _entries_ be the List that is _M_.[[MapData]].
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, return *true*.
+          1. Return *false*.
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-map.prototype.set">
+        <h1>Map.prototype.set ( _key_, _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_M_, _value_).</ins>
+          1. Let _entries_ be the List that is _M_.[[MapData]].
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, then
+              1. Set _p_.[[Value]] to <ins>_normalizedValue_</ins><del>_value_</del>.
+              1. Return _M_.
+          1. If _key_ is *-0*, set _key_ to *+0*.
+          1. Let _p_ be the Record { [[Key]]: _key_, [[Value]]: <ins>_normalizedValue_</ins><del>_value_</del> }.
+          1. Append _p_ as the last element of _entries_.
+          1. Return _M_.
+        </emu-alg>
+      </emu-clause>
+
+    <emu-clause id="sec-properties-of-map-instances">
+      <h1>Properties of Map Instances</h1>
+      <p>Map instances are ordinary objects that inherit properties from the Map prototype. Map instances also have [[MapData]], <ins>[[ToKey]], and [[ToValue]]</ins> internal slots.</p>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-set-objects">
+    <h1>Set Objects</h1>
+    <p>Set objects are collections of ECMAScript language values. A distinct value may only occur once as an element of a Set's collection. Distinct values are discriminated using the SameValueZero comparison algorithm.</p>
+    <p>Set objects must be implemented using either hash tables or other mechanisms that, on average, provide access times that are sublinear on the number of elements in the collection. The data structures used in this Set objects specification is only intended to describe the required observable semantics of Set objects. It is not intended to be a viable implementation model.</p>
+
+    <emu-clause id="sec-set-constructor">
+      <h1>The Set Constructor</h1>
+      <p>The Set constructor:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%Set%</dfn>.</li>
+        <li>is the initial value of the `Set` property of the global object.</li>
+        <li>creates and initializes a new Set object when called as a constructor.</li>
+        <li>is not intended to be called as a function and will throw an exception when called in that manner.</li>
+        <li>is designed to be subclassable. It may be used as the value in an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified `Set` behaviour must include a `super` call to the `Set` constructor to create and initialize the subclass instance with the internal state necessary to support the `Set.prototype` built-in methods.</li>
+      </ul>
+
+      <emu-clause id="sec-set-iterable">
+        <h1>Set ( [ _iterable_ <ins>[, _options_ ]</ins>] )</h1>
+        <p>When the `Set` function is called with optional argument _iterable_, the following steps are taken:</p>
+        <emu-alg>
+          1. If NewTarget is *undefined*, throw a *TypeError* exception.
+          1. Let _set_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%SetPrototype%"`, &laquo; [[SetData]] &raquo;).
+          1. Set _set_.[[SetData]] to a new empty List.
+          
+          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
+            1. Set _set_.[[ToValue]] to *undefined*
+          </ins>
+          1. <ins class="block">Else,
+            1. Set _set_.[[ToValue]] to ? Get(_options_, `"toValue"`).
+            1. If _set_.[[ToValue]] is *null* set _set_.[[ToValue]] to *undefined*
+          </ins>
+          1. If _iterable_ is not present, set _iterable_ to *undefined*.
+          1. If _iterable_ is either *undefined* or *null*, return _set_.
+          1. Let _adder_ be ? Get(_set_, `"add"`).
+          1. If IsCallable(_adder_) is *false*, throw a *TypeError* exception.
+          1. Let _iteratorRecord_ be ? GetIterator(_iterable_).
+          1. Repeat,
+            1. Let _next_ be ? IteratorStep(_iteratorRecord_).
+            1. If _next_ is *false*, return _set_.
+            1. Let _nextValue_ be ? IteratorValue(_next_).
+            1. Let _status_ be Call(_adder_, _set_, &laquo; _nextValue_ &raquo;).
+            1. If _status_ is an abrupt completion, return ? IteratorClose(_iteratorRecord_, _status_).
+        </emu-alg>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-properties-of-the-set-prototype-object">
+      <h1>Properties of the Set Prototype Object</h1>
+      <p>The Set prototype object:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%SetPrototype%</dfn>.</li>
+        <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
+        <li>is an ordinary object.</li>
+        <li>does not have a [[SetData]] internal slot.</li>
+        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+      </ul>
+
+      <emu-clause id="sec-set.prototype.add">
+        <h1>Set.prototype.add ( _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _S_ be the *this* value.
+          1. If Type(_S_) is not Object, throw a *TypeError* exception.
+          1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. Let _entries_ be the List that is _S_.[[SetData]].
+          1. For each _e_ that is an element of _entries_, do
+            1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
+              1. Return _S_.
+          1. If _value_ is *-0*, set _value_ to *+0*.
+          1. Append _value_ as the last element of _entries_.
+          1. Return _S_.
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-set.prototype.delete">
+        <h1>Set.prototype.delete ( _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _S_ be the *this* value.
+          1. If Type(_S_) is not Object, throw a *TypeError* exception.
+          1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. Let _entries_ be the List that is _S_.[[SetData]].
+          1. For each _e_ that is an element of _entries_, do
+            1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
+              1. Replace the element of _entries_ whose value is _e_ with an element whose value is ~empty~.
+              1. Return *true*.
+          1. Return *false*.
+        </emu-alg>
+        <emu-note>
+          <p>The value ~empty~ is used as a specification device to indicate that an entry has been deleted. Actual implementations may take other actions such as physically removing the entry from internal data structures.</p>
+        </emu-note>
+      </emu-clause>
+
+      <emu-clause id="sec-set.prototype.has">
+        <h1>Set.prototype.has ( _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _S_ be the *this* value.
+          1. If Type(_S_) is not Object, throw a *TypeError* exception.
+          1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. Let _entries_ be the List that is _S_.[[SetData]].
+          1. For each _e_ that is an element of _entries_, do
+            1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, return *true*.
+          1. Return *false*.
+        </emu-alg>
+      </emu-clause>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-weakmap-objects">
+    <h1>WeakMap Objects</h1>
+    <p>WeakMap objects are collections of key/value pairs where the keys are objects and values may be arbitrary ECMAScript language values. A WeakMap may be queried to see if it contains a key/value pair with a specific key, but no mechanism is provided for enumerating the objects it holds as keys. If an object that is being used as the key of a WeakMap key/value pair is only reachable by following a chain of references that start within that WeakMap, then that key/value pair is inaccessible and is automatically removed from the WeakMap. WeakMap implementations must detect and remove such key/value pairs and any associated resources.</p>
+    <p>An implementation may impose an arbitrarily determined latency between the time a key/value pair of a WeakMap becomes inaccessible and the time when the key/value pair is removed from the WeakMap. If this latency was observable to ECMAScript program, it would be a source of indeterminacy that could impact program execution. For that reason, an ECMAScript implementation must not provide any means to observe a key of a WeakMap that does not require the observer to present the observed key.</p>
+    <p>WeakMap objects must be implemented using either hash tables or other mechanisms that, on average, provide access times that are sublinear on the number of key/value pairs in the collection. The data structure used in this WeakMap objects specification are only intended to describe the required observable semantics of WeakMap objects. It is not intended to be a viable implementation model.</p>
+    <emu-note>
+      <p>WeakMap and WeakSets are intended to provide mechanisms for dynamically associating state with an object in a manner that does not &ldquo;leak&rdquo; memory resources if, in the absence of the WeakMap or WeakSet, the object otherwise became inaccessible and subject to resource reclamation by the implementation's garbage collection mechanisms. This characteristic can be achieved by using an inverted per-object mapping of weak map instances to keys. Alternatively each weak map may internally store its key to value mappings but this approach requires coordination between the WeakMap or WeakSet implementation and the garbage collector. The following references describe mechanism that may be useful to implementations of WeakMap and WeakSets:</p>
+      <p>Barry Hayes. 1997. Ephemerons: a new finalization mechanism. In <i>Proceedings of the 12th ACM SIGPLAN conference on Object-oriented programming, systems, languages, and applications (OOPSLA '97)</i>, A. Michael Berman (Ed.). ACM, New York, NY, USA, 176-183, <a href="http://doi.acm.org/10.1145/263698.263733">http://doi.acm.org/10.1145/263698.263733</a>.</p>
+      <p>Alexandra Barros, Roberto Ierusalimschy, Eliminating Cycles in Weak Tables. Journal of Universal Computer Science - J.UCS, vol. 14, no. 21, pp. 3481-3497, 2008, <a href="http://www.jucs.org/jucs_14_21/eliminating_cycles_in_weak">http://www.jucs.org/jucs_14_21/eliminating_cycles_in_weak</a></p>
+    </emu-note>
+
+    <emu-clause id="sec-weakmap-constructor">
+      <h1>The WeakMap Constructor</h1>
+      <p>The WeakMap constructor:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%WeakMap%</dfn>.</li>
+        <li>is the initial value of the `WeakMap` property of the global object.</li>
+        <li>creates and initializes a new WeakMap object when called as a constructor.</li>
+        <li>is not intended to be called as a function and will throw an exception when called in that manner.</li>
+        <li>is designed to be subclassable. It may be used as the value in an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified `WeakMap` behaviour must include a `super` call to the `WeakMap` constructor to create and initialize the subclass instance with the internal state necessary to support the `WeakMap.prototype` built-in methods.</li>
+      </ul>
+
+      <emu-clause id="sec-weakmap-iterable">
+        <h1>WeakMap ( [ _iterable_ <ins>[, _options_ ]</ins>] )</h1>
+        <p>When the `WeakMap` function is called with optional argument _iterable_, the following steps are taken:</p>
+        <emu-alg>
+          1. If NewTarget is *undefined*, throw a *TypeError* exception.
+          1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakMapPrototype%"`, &laquo; [[WeakMapData]] &raquo;).
+          1. Set _map_.[[WeakMapData]] to a new empty List.
+          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
+            1. Set _map_.[[ToKey]] to *undefined*
+            1. Set _map_.[[ToValue]] to *undefined*
+          </ins>
+          1. <ins class="block">Else,
+            1. Set _map_.[[ToKey]] to ? Get(_options_, `"toKey"`).
+            1. If _map_.[[ToKey]] is *null* set _map_.[[ToKey]] to *undefined*
+            1. Set _map_.[[ToValue]] to ? Get(_options_, `"toValue"`).
+            1. If _map_.[[ToValue]] is *null* set _map_.[[ToValue]] to *undefined*
+          </ins>
+          1. If _iterable_ is not present, or is either *undefined* or *null*, return _map_.
+          1. Let _adder_ be ? Get(_map_, `"set"`).
+          1. Return ? AddEntriesFromIterable(_map_, _iterable_, _adder_).
+        </emu-alg>
+        <emu-note>
+          <p>If the parameter _iterable_ is present, it is expected to be an object that implements an @@iterator method that returns an iterator object that produces a two element array-like object whose first element is a value that will be used as a WeakMap key and whose second element is the value to associate with that key.</p>
+        </emu-note>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-properties-of-the-weakmap-prototype-object">
+      <h1>Properties of the WeakMap Prototype Object</h1>
+      <p>The WeakMap prototype object:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%WeakMapPrototype%</dfn>.</li>
+        <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
+        <li>is an ordinary object.</li>
+        <li>does not have a [[WeakMapData]] internal slot.</li>
+        <li><ins>does not have a [[ToKey]] internal slot.</ins></li>
+        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+      </ul>
+
+      <emu-clause id="sec-weakmap.prototype.delete">
+        <h1>WeakMap.prototype.delete ( _key_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. Let _entries_ be the List that is _M_.[[WeakMapData]].
+          1. If Type(_key_) is not Object, return *false*.
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValue(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, then
+              1. Set _p_.[[Key]] to ~empty~.
+              1. Set _p_.[[Value]] to ~empty~.
+              1. Return *true*.
+          1. Return *false*.
+        </emu-alg>
+        <emu-note>
+          <p>The value ~empty~ is used as a specification device to indicate that an entry has been deleted. Actual implementations may take other actions such as physically removing the entry from internal data structures.</p>
+        </emu-note>
+      </emu-clause>
+
+      <emu-clause id="sec-weakmap.prototype.get">
+        <h1>WeakMap.prototype.get ( _key_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. Let _entries_ be the List that is _M_.[[WeakMapData]].
+          1. If Type(_key_) is not Object, return *undefined*.
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValue(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, return _p_.[[Value]].
+          1. Return *undefined*.
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-weakmap.prototype.has">
+        <h1>WeakMap.prototype.has ( _key_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. Let _entries_ be the List that is _M_.[[WeakMapData]].
+          1. If Type(_key_) is not Object, return *false*.
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValue(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, return *true*.
+          1. Return *false*.
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-weakmap.prototype.set">
+        <h1>WeakMap.prototype.set ( _key_, _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _M_ be the *this* value.
+          1. If Type(_M_) is not Object, throw a *TypeError* exception.
+          1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_M_, _value_).</ins>
+          1. Let _entries_ be the List that is _M_.[[WeakMapData]].
+          1. If Type(_key_) is not Object, throw a *TypeError* exception.
+          1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
+            1. If _p_.[[Key]] is not ~empty~ and SameValue(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, then
+              1. Set _p_.[[Value]] to _value_.
+              1. Return _M_.
+          1. Let _p_ be the Record { [[Key]]: _key_, [[Value]]: <ins>_normalizedValue_</ins><del>_value_</del> }.
+          1. Append _p_ as the last element of _entries_.
+          1. Return _M_.
+        </emu-alg>
+      </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-weakset-objects">
+    <h1>WeakSet Objects</h1>
+    <p>WeakSet objects are collections of objects. A distinct object may only occur once as an element of a WeakSet's collection. A WeakSet may be queried to see if it contains a specific object, but no mechanism is provided for enumerating the objects it holds. If an object that is contained by a WeakSet is only reachable by following a chain of references that start within that WeakSet, then that object is inaccessible and is automatically removed from the WeakSet. WeakSet implementations must detect and remove such objects and any associated resources.</p>
+    <p>An implementation may impose an arbitrarily determined latency between the time an object contained in a WeakSet becomes inaccessible and the time when the object is removed from the WeakSet. If this latency was observable to ECMAScript program, it would be a source of indeterminacy that could impact program execution. For that reason, an ECMAScript implementation must not provide any means to determine if a WeakSet contains a particular object that does not require the observer to present the observed object.</p>
+    <p>WeakSet objects must be implemented using either hash tables or other mechanisms that, on average, provide access times that are sublinear on the number of elements in the collection. The data structure used in this WeakSet objects specification is only intended to describe the required observable semantics of WeakSet objects. It is not intended to be a viable implementation model.</p>
+    <emu-note>
+      <p>See the NOTE in <emu-xref href="#sec-weakmap-objects"></emu-xref>.</p>
+    </emu-note>
+
+    <emu-clause id="sec-weakset-constructor">
+      <h1>The WeakSet Constructor</h1>
+      <p>The WeakSet constructor:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%WeakSet%</dfn>.</li>
+        <li>is the initial value of the `WeakSet` property of the global object.</li>
+        <li>creates and initializes a new WeakSet object when called as a constructor.</li>
+        <li>is not intended to be called as a function and will throw an exception when called in that manner.</li>
+        <li>is designed to be subclassable. It may be used as the value in an `extends` clause of a class definition. Subclass constructors that intend to inherit the specified `WeakSet` behaviour must include a `super` call to the `WeakSet` constructor to create and initialize the subclass instance with the internal state necessary to support the `WeakSet.prototype` built-in methods.</li>
+      </ul>
+
+      <emu-clause id="sec-weakset-iterable">
+        <h1>WeakSet ( [ _iterable_ ] )</h1>
+        <p>When the `WeakSet` function is called with optional argument _iterable_, the following steps are taken:</p>
+        <emu-alg>
+          1. If NewTarget is *undefined*, throw a *TypeError* exception.
+          1. Let _set_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakSetPrototype%"`, &laquo; [[WeakSetData]] &raquo;).
+          1. Set _set_.[[WeakSetData]] to a new empty List.
+          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
+            1. Set _map_.[[ToValue]] to *undefined*
+          </ins>
+          1. <ins class="block">Else,
+            1. Set _map_.[[ToValue]] to ? Get(_options_, `"toValue"`).
+            1. If _map_.[[ToValue]] is *null* set _map_.[[ToValue]] to *undefined*
+          </ins>
+          1. If _iterable_ is not present, set _iterable_ to *undefined*.
+          1. If _iterable_ is either *undefined* or *null*, return _set_.
+          1. Let _adder_ be ? Get(_set_, `"add"`).
+          1. If IsCallable(_adder_) is *false*, throw a *TypeError* exception.
+          1. Let _iteratorRecord_ be ? GetIterator(_iterable_).
+          1. Repeat,
+            1. Let _next_ be ? IteratorStep(_iteratorRecord_).
+            1. If _next_ is *false*, return _set_.
+            1. Let _nextValue_ be ? IteratorValue(_next_).
+            1. Let _status_ be Call(_adder_, _set_, &laquo; _nextValue_ &raquo;).
+            1. If _status_ is an abrupt completion, return ? IteratorClose(_iteratorRecord_, _status_).
+        </emu-alg>
+      </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-properties-of-the-weakset-prototype-object">
+      <h1>Properties of the WeakSet Prototype Object</h1>
+      <p>The WeakSet prototype object:</p>
+      <ul>
+        <li>is the intrinsic object <dfn>%WeakSetPrototype%</dfn>.</li>
+        <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
+        <li>is an ordinary object.</li>
+        <li><ins>does not have a [[WeakSetData]] internal slot.</ins></li>
+      </ul>
+
+      <emu-clause id="sec-weakset.prototype.add">
+        <h1>WeakSet.prototype.add ( _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _S_ be the *this* value.
+          1. If Type(_S_) is not Object, throw a *TypeError* exception.
+          1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. If Type(_value_) is not Object, throw a *TypeError* exception.
+          1. Let _entries_ be the List that is _S_.[[WeakSetData]].
+          1. For each _e_ that is an element of _entries_, do
+            1. If _e_ is not ~empty~ and SameValue(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
+              1. Return _S_.
+          1. Append _value_ as the last element of _entries_.
+          1. Return _S_.
+        </emu-alg>
+      </emu-clause>
+
+      <emu-clause id="sec-weakset.prototype.delete">
+        <h1>WeakSet.prototype.delete ( _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _S_ be the *this* value.
+          1. If Type(_S_) is not Object, throw a *TypeError* exception.
+          1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. If Type(_value_) is not Object, return *false*.
+          1. Let _entries_ be the List that is _S_.[[WeakSetData]].
+          1. For each _e_ that is an element of _entries_, do
+            1. If _e_ is not ~empty~ and SameValue(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
+              1. Replace the element of _entries_ whose value is _e_ with an element whose value is ~empty~.
+              1. Return *true*.
+          1. Return *false*.
+        </emu-alg>
+        <emu-note>
+          <p>The value ~empty~ is used as a specification device to indicate that an entry has been deleted. Actual implementations may take other actions such as physically removing the entry from internal data structures.</p>
+        </emu-note>
+      </emu-clause>
+
+      <emu-clause id="sec-weakset.prototype.has">
+        <h1>WeakSet.prototype.has ( _value_ )</h1>
+        <p>The following steps are taken:</p>
+        <emu-alg>
+          1. Let _S_ be the *this* value.
+          1. If Type(_S_) is not Object, throw a *TypeError* exception.
+          1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
+          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. Let _entries_ be the List that is _S_.[[WeakSetData]].
+          1. If Type(_value_) is not Object, return *false*.
+          1. For each _e_ that is an element of _entries_, do
+            1. If _e_ is not ~empty~ and SameValue(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, return *true*.
+          1. Return *false*.
+        </emu-alg>
+      </emu-clause>
+  </emu-clause>
+</emu-clause>

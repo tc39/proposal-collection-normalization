@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "build": "ecmarkup spec.emu > index.html"
+  },
+  "dependencies": {
+    "ecmarkup": "3.16.0"
+  }
+}
