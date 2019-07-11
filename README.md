@@ -82,6 +82,18 @@ set.has({path: '/foo')};
 
 Normalization is not done when iterating or returning internal data, it is only done on parameters.
 
+### Why would someone want to use `toValue` with Map?
+
+A variety of use cases exist to normalize the values of map like structures in different APIs. Even if they do not directly use Map, we can se the utility of this pattern from existing DOM APIs.
+
+* `URLSearchParams`
+* `DomStringMap`
+* `Header`
+
+Node also has APIs that also normalize values such as `process.env`.
+
+Normalizing values can avoid certain situations as well such as putting invalid values into a Map by either validation errors, coercion, or other means. Existing map like structures such as `require.cache` can produce error if you put the incorrect values in them. A normalization step allows the map to properly handle situations when unexpected values are inserted.
+
 ### Why are Sets only given `toValue`?
 
 Sets are collections of values, and do not have a mapping operation from one value to another.
