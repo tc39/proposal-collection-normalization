@@ -86,6 +86,10 @@ Normalization is not done when iterating or returning internal data, it is only 
 
 Sets are collections of values, and do not have a mapping operation from one value to another.
 
+#### Why not call it `toKey` for Sets?
+
+An audit of other languages was done with their documentation and APIs concerning Sets. The majority of terminology used was "elements"; however, the terms "keys" and "values" were also used. It was noted that whenever "keys" was used "values" was also used, but when "values" was used it did not always also use "keys". To match existing JS usage of terms "values" was chosen as the base for this name.
+
 ### Why not `value[Symbol.toKey]`?
 
 Having specialized identity conflicts with the idea of having multiple kinds of specialized maps per type of value. It also would cause conflicts when wanting to specialize keys that are based upon primitives.
