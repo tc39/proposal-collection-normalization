@@ -1,6 +1,6 @@
-# Collection {toKey, toValue}
+# Collection {coerceKey, coerceValue}
 
-This proposal seeks to add a `toKey` and `toValue` parameter to collection creation.
+This proposal seeks to add a `coerceKey` and `coerceValue` parameter to collection creation.
 
 [Rendered Spec](https://tc39.github.io/proposal-collection-normalization/)
 
@@ -12,10 +12,10 @@ Given an application with User Objects it may be desirable to create collections
 
 ```mjs
 new Map(undefined, {
-  toKey({email}) {
+  coerceKey({email}) {
     return email;
   },
-  toValue(state) {
+  coerceValue(state) {
     return state instanceof AccountState ? 
       state :
       new AccountState(state);
@@ -25,7 +25,7 @@ new Map(undefined, {
 
 ```mjs
 new Set(undefined, {
-  toValue({username}) {
+  coerceValue({username}) {
     return username;
   }
 });
@@ -37,7 +37,7 @@ It is a common occurance to want to check types when performaning operations on 
 
 ```mjs
 new Map(undefined, {
-  toKey(user) {
+  coerceKey(user) {
     if (user instanceof User !== true) {
       throw new TypeError('Expected User for key');
     }
@@ -62,7 +62,7 @@ Normalization is applied when data is incoming to find the identity of the key l
 
 ```mjs
 const map = new Map([], {
-  toKey: String
+  coerceKey: String
 });
 // stored using { [[Key]]: "1", [[Value]]: "one" } in map.[[MapData]]
 map.set(1, 'one');
@@ -71,7 +71,7 @@ map.has(1); // true
 // functions directly exposing the underlying entry list are unaffected
 [...map.entries()]; // [["1", "one"]]
 
-const set = new Set([], {toValue: JSON.stringify});
+const set = new Set([], {coerceValue: JSON.stringify});
 // stored using { [[Value]]: '{"path": "/foo"}' } in set.[[SetData]]
 set.add({path: '/foo'});
 // looks for corresponding { [[Value]]: '{"path": "/foo"}' } in set.[[SetData]]
@@ -82,7 +82,7 @@ set.has({path: '/foo')};
 
 Normalization is not done when iterating or returning internal data, it is only done on parameters.
 
-### Why would someone want to use `toValue` with Map?
+### Why would someone want to use `coerceValue` with Map?
 
 A variety of use cases exist to normalize the values of map like structures in different APIs. Even if they do not directly use Map, we can se the utility of this pattern from existing DOM APIs.
 
@@ -94,15 +94,15 @@ Node also has APIs that also normalize values such as `process.env`.
 
 Normalizing values can avoid certain situations as well such as putting invalid values into a Map by either validation errors, coercion, or other means. Existing map like structures such as `require.cache` can produce error if you put the incorrect values in them. A normalization step allows the map to properly handle situations when unexpected values are inserted.
 
-### Why are Sets only given `toValue`?
+### Why are Sets only given `coerceValue`?
 
 Sets are collections of values, and do not have a mapping operation from one value to another.
 
-#### Why not call it `toKey` for Sets?
+#### Why not call it `coerceKey` for Sets?
 
 An audit of other languages was done with their documentation and APIs concerning Sets. The majority of terminology used was "elements"; however, the terms "keys" and "values" were also used. It was noted that whenever "keys" was used "values" was also used, but when "values" was used it did not always also use "keys". To match existing JS usage of terms "values" was chosen as the base for this name.
 
-### Why not `value[Symbol.toKey]`?
+### Why not `value[Symbol.coerceKey]`?
 
 Having specialized identity conflicts with the idea of having multiple kinds of specialized maps per type of value. It also would cause conflicts when wanting to specialize keys that are based upon primitives.
 
