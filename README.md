@@ -33,7 +33,7 @@ new Set(undefined, {
 
 ### Checked keys
 
-It is a common occurance to want to check types when performaning operations on collections. This can be done during keying.
+It is a common occurrence to want to check types when performaning operations on collections. This can be done during keying.
 
 ```mjs
 new Map(undefined, {
