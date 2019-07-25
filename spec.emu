@@ -12,21 +12,21 @@ contributors: Bradley Farias
 <emu-clause id="normalization-ops">
   <h1>Data normalization operations</h1>
   
-  <emu-clause id="normalize-to-key">
-  <h1>NormalizeToKey( _collection_ , _data_ )</h1>
+  <emu-clause id="normalize-coerce-key">
+  <h1>NormalizeCoerceKey( _collection_ , _data_ )</h1>
   <emu-alg>
-    1. If _collection_ does not have [[ToKey]] or _collection_.[[ToKey]] is *undefined*
+    1. If _collection_ does not have [[CoerceKey]] or _collection_.[[CoerceKey]] is *undefined*
       1. Return _data_.
-    1. Else, return Call(_collection_.[[ToKey]], _collection_, &laquo; _data_ &raquo;).
+    1. Else, return Call(_collection_.[[CoerceKey]], _collection_, &laquo; _data_ &raquo;).
   </emu-alg>
   </emu-clause>
 
-  <emu-clause id="normalize-to-value">
-  <h1>NormalizeToValue( _collection_ , _data_ )</h1>
+  <emu-clause id="normalize-coerce-value">
+  <h1>NormalizeCoerceValue( _collection_ , _data_ )</h1>
   <emu-alg>
-    1. If _collection_ does not have [[ToValue]] or _collection_.[[ToValue]] is *undefined*
+    1. If _collection_ does not have [[CoerceValue]] or _collection_.[[CoerceValue]] is *undefined*
       1. Return _data_.
-    1. Else, return Call(_collection_.[[ToValue]], _collection_, &laquo; _data_ &raquo;).
+    1. Else, return Call(_collection_.[[CoerceValue]], _collection_, &laquo; _data_ &raquo;).
   </emu-alg>
   </emu-clause>
 </emu-clause>
@@ -57,17 +57,17 @@ contributors: Bradley Farias
         <p>When the `Map` function is called with optional argument _iterable_, the following steps are taken:</p>
         <emu-alg>
           1. If NewTarget is *undefined*, throw a *TypeError* exception.
-          1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%MapPrototype%"`, &laquo; [[MapData]], [[ToKey]], [[ToValue]] &raquo;).
+          1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%MapPrototype%"`, &laquo; [[MapData]], [[CoerceKey]], [[CoerceValue]] &raquo;).
           1. Set _map_.[[MapData]] to a new empty List.
           1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _map_.[[ToKey]] to *undefined*
-            1. Set _map_.[[ToValue]] to *undefined*
+            1. Set _map_.[[CoerceKey]] to *undefined*
+            1. Set _map_.[[CoerceValue]] to *undefined*
           </ins>
           1. <ins class="block">Else,
-            1. Set _map_.[[ToKey]] to ? Get(_options_, `"toKey"`).
-            1. If _map_.[[ToKey]] is *null* set _map_.[[ToKey]] to *undefined*
-            1. Set _map_.[[ToValue]] to ? Get(_options_, `"toValue"`).
-            1. If _map_.[[ToValue]] is *null* set _map_.[[ToValue]] to *undefined*
+            1. Set _map_.[[CoerceKey]] to ? Get(_options_, `"coerceKey"`).
+            1. If _map_.[[CoerceKey]] is *null* set _map_.[[CoerceKey]] to *undefined*
+            1. Set _map_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
+            1. If _map_.[[CoerceValue]] is *null* set _map_.[[CoerceValue]] to *undefined*
           </ins>
           1. If _iterable_ is not present, or is either *undefined* or *null*, return _map_.
           1. Let _adder_ be ? Get(_map_, `"set"`).
@@ -87,8 +87,8 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[MapData]] internal slot.</li>
-        <li><ins>does not have a [[ToKey]] internal slot.</ins></li>
-        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceKey]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-map.prototype.delete">
@@ -98,7 +98,7 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
           1. Let _entries_ be the List that is _M_.[[MapData]].
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
             1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, then
@@ -119,7 +119,7 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
           1. Let _entries_ be the List that is _M_.[[MapData]].
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
             1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, return _p_.[[Value]].
@@ -134,7 +134,7 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
           1. Let _entries_ be the List that is _M_.[[MapData]].
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
             1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, return *true*.
@@ -149,8 +149,8 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[MapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_M_, _value_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_M_, _value_).</ins>
           1. Let _entries_ be the List that is _M_.[[MapData]].
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
             1. If _p_.[[Key]] is not ~empty~ and SameValueZero(_p_.[[Key]], <ins>_normalizedKey_</ins><del>_key_</del>) is *true*, then
@@ -165,7 +165,7 @@ contributors: Bradley Farias
 
     <emu-clause id="sec-properties-of-map-instances">
       <h1>Properties of Map Instances</h1>
-      <p>Map instances are ordinary objects that inherit properties from the Map prototype. Map instances also have [[MapData]], <ins>[[ToKey]], and [[ToValue]]</ins> internal slots.</p>
+      <p>Map instances are ordinary objects that inherit properties from the Map prototype. Map instances also have [[MapData]], <ins>[[CoerceKey]], and [[CoerceValue]]</ins> internal slots.</p>
     </emu-clause>
   </emu-clause>
 
@@ -194,11 +194,11 @@ contributors: Bradley Farias
           1. Set _set_.[[SetData]] to a new empty List.
           
           1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _set_.[[ToValue]] to *undefined*
+            1. Set _set_.[[CoerceValue]] to *undefined*
           </ins>
           1. <ins class="block">Else,
-            1. Set _set_.[[ToValue]] to ? Get(_options_, `"toValue"`).
-            1. If _set_.[[ToValue]] is *null* set _set_.[[ToValue]] to *undefined*
+            1. Set _set_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
+            1. If _set_.[[CoerceValue]] is *null* set _set_.[[CoerceValue]] to *undefined*
           </ins>
           1. If _iterable_ is not present, set _iterable_ to *undefined*.
           1. If _iterable_ is either *undefined* or *null*, return _set_.
@@ -223,7 +223,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[SetData]] internal slot.</li>
-        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-set.prototype.add">
@@ -233,7 +233,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[SetData]].
           1. For each _e_ that is an element of _entries_, do
             1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
@@ -251,7 +251,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[SetData]].
           1. For each _e_ that is an element of _entries_, do
             1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, then
@@ -271,7 +271,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[SetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[SetData]].
           1. For each _e_ that is an element of _entries_, do
             1. If _e_ is not ~empty~ and SameValueZero(_e_, <ins>_normalizedValue_</ins><del>_value_</del>) is *true*, return *true*.
@@ -311,14 +311,14 @@ contributors: Bradley Farias
           1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakMapPrototype%"`, &laquo; [[WeakMapData]] &raquo;).
           1. Set _map_.[[WeakMapData]] to a new empty List.
           1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _map_.[[ToKey]] to *undefined*
-            1. Set _map_.[[ToValue]] to *undefined*
+            1. Set _map_.[[CoerceKey]] to *undefined*
+            1. Set _map_.[[CoerceValue]] to *undefined*
           </ins>
           1. <ins class="block">Else,
-            1. Set _map_.[[ToKey]] to ? Get(_options_, `"toKey"`).
-            1. If _map_.[[ToKey]] is *null* set _map_.[[ToKey]] to *undefined*
-            1. Set _map_.[[ToValue]] to ? Get(_options_, `"toValue"`).
-            1. If _map_.[[ToValue]] is *null* set _map_.[[ToValue]] to *undefined*
+            1. Set _map_.[[CoerceKey]] to ? Get(_options_, `"coerceKey"`).
+            1. If _map_.[[CoerceKey]] is *null* set _map_.[[CoerceKey]] to *undefined*
+            1. Set _map_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
+            1. If _map_.[[CoerceValue]] is *null* set _map_.[[CoerceValue]] to *undefined*
           </ins>
           1. If _iterable_ is not present, or is either *undefined* or *null*, return _map_.
           1. Let _adder_ be ? Get(_map_, `"set"`).
@@ -338,8 +338,8 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[WeakMapData]] internal slot.</li>
-        <li><ins>does not have a [[ToKey]] internal slot.</ins></li>
-        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceKey]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-weakmap.prototype.delete">
@@ -349,7 +349,7 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
           1. Let _entries_ be the List that is _M_.[[WeakMapData]].
           1. If Type(_key_) is not Object, return *false*.
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
@@ -371,7 +371,7 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
           1. Let _entries_ be the List that is _M_.[[WeakMapData]].
           1. If Type(_key_) is not Object, return *undefined*.
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
@@ -387,7 +387,7 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
           1. Let _entries_ be the List that is _M_.[[WeakMapData]].
           1. If Type(_key_) is not Object, return *false*.
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
@@ -403,8 +403,8 @@ contributors: Bradley Farias
           1. Let _M_ be the *this* value.
           1. If Type(_M_) is not Object, throw a *TypeError* exception.
           1. If _M_ does not have a [[WeakMapData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedKey_ be ? NormalizeToKey(_M_, _key_).</ins>
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_M_, _value_).</ins>
+          1. <ins>Let _normalizedKey_ be ? NormalizeCoerceKey(_M_, _key_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_M_, _value_).</ins>
           1. Let _entries_ be the List that is _M_.[[WeakMapData]].
           1. If Type(_key_) is not Object, throw a *TypeError* exception.
           1. For each Record { [[Key]], [[Value]] } _p_ that is an element of _entries_, do
@@ -446,11 +446,11 @@ contributors: Bradley Farias
           1. Let _set_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakSetPrototype%"`, &laquo; [[WeakSetData]] &raquo;).
           1. Set _set_.[[WeakSetData]] to a new empty List.
           1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _set_.[[ToValue]] to *undefined*
+            1. Set _set_.[[CoerceValue]] to *undefined*
           </ins>
           1. <ins class="block">Else,
-            1. Set _set_.[[ToValue]] to ? Get(_options_, `"toValue"`).
-            1. If _set_.[[ToValue]] is *null* set _set_.[[ToValue]] to *undefined*
+            1. Set _set_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
+            1. If _set_.[[CoerceValue]] is *null* set _set_.[[CoerceValue]] to *undefined*
           </ins>
           1. If _iterable_ is not present, set _iterable_ to *undefined*.
           1. If _iterable_ is either *undefined* or *null*, return _set_.
@@ -475,7 +475,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[WeakSetData]] internal slot.</li>
-        <li><ins>does not have a [[ToValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-weakset.prototype.add">
@@ -485,7 +485,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_S_, _value_).</ins>
           1. If Type(_value_) is not Object, throw a *TypeError* exception.
           1. Let _entries_ be the List that is _S_.[[WeakSetData]].
           1. For each _e_ that is an element of _entries_, do
@@ -503,7 +503,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_S_, _value_).</ins>
           1. If Type(_value_) is not Object, return *false*.
           1. Let _entries_ be the List that is _S_.[[WeakSetData]].
           1. For each _e_ that is an element of _entries_, do
@@ -524,7 +524,7 @@ contributors: Bradley Farias
           1. Let _S_ be the *this* value.
           1. If Type(_S_) is not Object, throw a *TypeError* exception.
           1. If _S_ does not have a [[WeakSetData]] internal slot, throw a *TypeError* exception.
-          1. <ins>Let _normalizedValue_ be ? NormalizeToValue(_S_, _value_).</ins>
+          1. <ins>Let _normalizedValue_ be ? NormalizeCoerceValue(_S_, _value_).</ins>
           1. Let _entries_ be the List that is _S_.[[WeakSetData]].
           1. If Type(_value_) is not Object, return *false*.
           1. For each _e_ that is an element of _entries_, do
