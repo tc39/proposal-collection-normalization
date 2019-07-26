@@ -15,18 +15,22 @@ contributors: Bradley Farias
   <emu-clause id="normalize-coerce-key">
   <h1>NormalizeCoerceKey( _collection_ , _data_ )</h1>
   <emu-alg>
-    1. If _collection_ does not have [[CoerceKey]] or _collection_.[[CoerceKey]] is *undefined*
+    1. Let _target_ be _collection_.[[CoerceHandler]].
+    1. Let _trap_ be ? GetMethod(_target_, `"coerceKey"`).
+    1. If _trap_ is undefined
       1. Return _data_.
-    1. Else, return Call(_collection_.[[CoerceKey]], _collection_, &laquo; _data_ &raquo;).
+    1. return Call(_trap_, _target_, &laquo; _data_, _collection_ &raquo;).
   </emu-alg>
   </emu-clause>
 
   <emu-clause id="normalize-coerce-value">
   <h1>NormalizeCoerceValue( _collection_ , _data_ )</h1>
   <emu-alg>
-    1. If _collection_ does not have [[CoerceValue]] or _collection_.[[CoerceValue]] is *undefined*
+    1. Let _target_ be _collection_.[[CoerceHandler]].
+    1. Let _trap_ be ? GetMethod(_target_, `"coerceValue"`).
+    1. If _trap_ is undefined
       1. Return _data_.
-    1. Else, return Call(_collection_.[[CoerceValue]], _collection_, &laquo; _data_ &raquo;).
+    1. return Call(_trap_, _target_, &laquo; _data_, _collection_ &raquo;).
   </emu-alg>
   </emu-clause>
 </emu-clause>
@@ -57,17 +61,13 @@ contributors: Bradley Farias
         <p>When the `Map` function is called with optional argument _iterable_, the following steps are taken:</p>
         <emu-alg>
           1. If NewTarget is *undefined*, throw a *TypeError* exception.
-          1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%MapPrototype%"`, &laquo; [[MapData]], [[CoerceKey]], [[CoerceValue]] &raquo;).
+          1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%MapPrototype%"`, &laquo; [[MapData]], [[CoerceHandler]] &raquo;).
           1. Set _map_.[[MapData]] to a new empty List.
-          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _map_.[[CoerceKey]] to *undefined*
-            1. Set _map_.[[CoerceValue]] to *undefined*
+          1. <ins class="block">If Type(_options_) is Object,
+            1. Set _map_.[[CoerceHandler]] to _options_.
           </ins>
           1. <ins class="block">Else,
-            1. Set _map_.[[CoerceKey]] to ? Get(_options_, `"coerceKey"`).
-            1. If _map_.[[CoerceKey]] is *null* set _map_.[[CoerceKey]] to *undefined*
-            1. Set _map_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
-            1. If _map_.[[CoerceValue]] is *null* set _map_.[[CoerceValue]] to *undefined*
+            1. Set _map_.[[CoerceHandler]] to ObjectCreate(*null*).
           </ins>
           1. If _iterable_ is not present, or is either *undefined* or *null*, return _map_.
           1. Let _adder_ be ? Get(_map_, `"set"`).
@@ -87,8 +87,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[MapData]] internal slot.</li>
-        <li><ins>does not have a [[CoerceKey]] internal slot.</ins></li>
-        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceHandler]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-map.prototype.delete">
@@ -165,7 +164,7 @@ contributors: Bradley Farias
 
     <emu-clause id="sec-properties-of-map-instances">
       <h1>Properties of Map Instances</h1>
-      <p>Map instances are ordinary objects that inherit properties from the Map prototype. Map instances also have [[MapData]], <ins>[[CoerceKey]], and [[CoerceValue]]</ins> internal slots.</p>
+      <p>Map instances are ordinary objects that inherit properties from the Map prototype. Map instances also have [[MapData]], and <ins>[[CoerceHandler]]</ins> internal slots.</p>
     </emu-clause>
   </emu-clause>
 
@@ -193,12 +192,11 @@ contributors: Bradley Farias
           1. Let _set_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%SetPrototype%"`, &laquo; [[SetData]] &raquo;).
           1. Set _set_.[[SetData]] to a new empty List.
           
-          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _set_.[[CoerceValue]] to *undefined*
+          1. <ins class="block">If Type(_options_) is Object,
+            1. Set _map_.[[CoerceHandler]] to _options_.
           </ins>
           1. <ins class="block">Else,
-            1. Set _set_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
-            1. If _set_.[[CoerceValue]] is *null* set _set_.[[CoerceValue]] to *undefined*
+            1. Set _map_.[[CoerceHandler]] to ObjectCreate(*null*).
           </ins>
           1. If _iterable_ is not present, set _iterable_ to *undefined*.
           1. If _iterable_ is either *undefined* or *null*, return _set_.
@@ -223,7 +221,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[SetData]] internal slot.</li>
-        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceHandler]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-set.prototype.add">
@@ -310,15 +308,11 @@ contributors: Bradley Farias
           1. If NewTarget is *undefined*, throw a *TypeError* exception.
           1. Let _map_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakMapPrototype%"`, &laquo; [[WeakMapData]] &raquo;).
           1. Set _map_.[[WeakMapData]] to a new empty List.
-          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _map_.[[CoerceKey]] to *undefined*
-            1. Set _map_.[[CoerceValue]] to *undefined*
+          1. <ins class="block">If Type(_options_) is Object,
+            1. Set _map_.[[CoerceHandler]] to _options_.
           </ins>
           1. <ins class="block">Else,
-            1. Set _map_.[[CoerceKey]] to ? Get(_options_, `"coerceKey"`).
-            1. If _map_.[[CoerceKey]] is *null* set _map_.[[CoerceKey]] to *undefined*
-            1. Set _map_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
-            1. If _map_.[[CoerceValue]] is *null* set _map_.[[CoerceValue]] to *undefined*
+            1. Set _map_.[[CoerceHandler]] to ObjectCreate(*null*).
           </ins>
           1. If _iterable_ is not present, or is either *undefined* or *null*, return _map_.
           1. Let _adder_ be ? Get(_map_, `"set"`).
@@ -338,8 +332,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[WeakMapData]] internal slot.</li>
-        <li><ins>does not have a [[CoerceKey]] internal slot.</ins></li>
-        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceHandler]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-weakmap.prototype.delete">
@@ -445,12 +438,11 @@ contributors: Bradley Farias
           1. If NewTarget is *undefined*, throw a *TypeError* exception.
           1. Let _set_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%WeakSetPrototype%"`, &laquo; [[WeakSetData]] &raquo;).
           1. Set _set_.[[WeakSetData]] to a new empty List.
-          1. <ins class="block">If _options_ is not present, or is either *undefined* or *null*
-            1. Set _set_.[[CoerceValue]] to *undefined*
+          1. <ins class="block">If Type(_options_) is Object,
+            1. Set _map_.[[CoerceHandler]] to _options_.
           </ins>
           1. <ins class="block">Else,
-            1. Set _set_.[[CoerceValue]] to ? Get(_options_, `"coerceValue"`).
-            1. If _set_.[[CoerceValue]] is *null* set _set_.[[CoerceValue]] to *undefined*
+            1. Set _map_.[[CoerceHandler]] to ObjectCreate(*null*).
           </ins>
           1. If _iterable_ is not present, set _iterable_ to *undefined*.
           1. If _iterable_ is either *undefined* or *null*, return _set_.
@@ -475,7 +467,7 @@ contributors: Bradley Farias
         <li>has a [[Prototype]] internal slot whose value is the intrinsic object %ObjectPrototype%.</li>
         <li>is an ordinary object.</li>
         <li>does not have a [[WeakSetData]] internal slot.</li>
-        <li><ins>does not have a [[CoerceValue]] internal slot.</ins></li>
+        <li><ins>does not have a [[CoerceHandler]] internal slot.</ins></li>
       </ul>
 
       <emu-clause id="sec-weakset.prototype.add">
