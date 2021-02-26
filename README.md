@@ -33,7 +33,7 @@ new Set(undefined, {
 
 ### Checked keys
 
-It is a common occurrence to want to check types when performaning operations on collections. This can be done during keying.
+It is a common occurrence to want to check types when performing operations on collections. This can be done during keying.
 
 ```mjs
 new Map(undefined, {
@@ -116,7 +116,7 @@ myCustomMap.__proto__.get.call(myCustomMap, key);
 
 which would somewhat invalidate the idea of checking types of keys.
 
-2. It prevents needing to synchronize all of the methods which is a fair amount of boiler plate and potential place for code going out of sync. It also means that your custom implementation will work even if new methods are added to collections in the JS standard library:
+2. It prevents needing to synchronize all of the methods which is a fair amount of boilerplate and potential place for code going out of sync. It also means that your custom implementation will work even if new methods are added to collections in the JS standard library:
 
 ```mjs
 class MyMap extends Map {
