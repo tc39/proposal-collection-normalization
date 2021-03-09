@@ -4,6 +4,41 @@ This proposal seeks to add a `coerceKey` and `coerceValue` parameter to collecti
 
 [Rendered Spec](https://tc39.github.io/proposal-collection-normalization/)
 
+## Motivation
+
+Various data structures are expected to have consistent constraints and or normalization applied to their keys and/or values when being used after creation. In order to facilitate normalization be guaranteed for such data types it needs to be applied prior to being inserted into the data structure. The current workflow is to manually ensure that at all locations which insert data into the structure properly normalize the data.
+
+This leads to various issues such as potentially fragile boilerplate problems such as; normalization not applied to all insertion locations or normalization not applied in consistent manners across insertion locations.
+
+This proposal does add a new capability of guarantees around the stored values in these data structures. Currently calling various built ins methods can avoid any mechanism to intercept and normalize data as it is inserted by calling methods on a structure like `Map.prototype.set.call(mapOfStringsToStrings, number)` which prevents guarantees about a `Map` having a consistent set of guarantees about the data it contains.
+
+Various examples of structures that normalize data as it is inserted exist in the wild:
+
+* [`URLSearchParams`](https://url.spec.whatwg.org/#urlsearchparams)
+
+Converts data to strings for both parameter name and value.
+
+* [`DomStringMap`](https://html.spec.whatwg.org/#domstringmap)
+
+Validates and converts data to strings for both header name and value.
+
+* [`Header`](https://fetch.spec.whatwg.org/#headers-class)
+
+Converts data to strings for both header name and value.
+
+* [`HTMLOptionsCollection[[setter]]`](https://html.spec.whatwg.org/#the-htmloptionscollection-interface)
+
+Clamps the key when appending to `length + 1` by using `append`.
+
+* [`Attributes.setNamedItem*`](https://dom.spec.whatwg.org/#concept-element-attributes-set)
+
+Performs validation on key.
+
+All of these do similar effects using differing ways of applying data type coercion and validation of data being inserted.
+
+In order to unify how to define these general operations on dealing with incoming data and to avoid boilerplate issues and fragile base class issues as mentioned in the FAQ a hook to
+intercept data would alleviate some issues.
+
 ## Use cases
 
 ### Specialized maps
@@ -45,6 +80,32 @@ new Map(undefined, {
   }
 });
 ```
+
+### DOM Example: [Headers..set](https://fetch.spec.whatwg.org/#dom-headers-set)
+
+> 1. Normalize value.
+
+> 2. If name is not a name or value is not a value, then throw a TypeError.
+
+> 3. If this’s guard is "immutable", then throw a TypeError.
+
+> 4. Otherwise, if this’s guard is "request" and name is a forbidden header name, return.
+
+> 5. Otherwise, if this’s guard is "request-no-cors" and name/value is not a no-CORS-safelisted request-header, return.
+
+> 6. Otherwise, if this’s guard is "response" and name is a forbidden response-header name, return.
+
+> 7. Set name/value in this’s header list.
+
+> 8. If this’s guard is "request-no-cors", then remove privileged no-CORS request headers from this.
+
+All of these can be interacted with if a hook can intercept `name` and `value` as it comes in. The general workflow is to store a `name` and `value` in the backing `header list` storage.
+
+### DOM Example: [SearchParams..has](https://url.spec.whatwg.org/#dom-urlsearchparams-has)
+
+> The has(name) method steps are to return true if there is a name-value pair whose name is name in this’s list, and false otherwise.
+
+Note, all normalization is done in WebIDL layer here to convert `name` to a USVString, there is no actual text stating that normalization is done for `name`.
 
 ## FAQ
 
